@@ -1,0 +1,80 @@
+
+--=================================================================================================
+Erros encontrados:
+--=================================================================================================
+
+- Index.cshtml - A página não verifica se a model está nula e tenta percorre-la com um laço, resultanto num erro de execução.
+Inlcui a clausula IF para verificar se a model está nula.
+
+- Index.cshtml - A página aponta para "ContatoWeb.Models.Contato" tentando alcançar o objeto Contato.cs, porém não o alcança por erro de estrutura, e mesmo que alcançasse a página não deve
+mirar uma classe de propriedades que retornará vazia.
+
+- Index.cshtml - O objeto comentado "Crud1.Contato" também não existe. Talvez a intenção fosse apontar para o " Crud1.Models.Contato", mas ainda sim estaria errado.
+
+- Na pagina _Layout.cshtml o método @Html.ActionLink NÃO EXISTE, o VS informa que há erro de sintaxe inexistente. É aquele problema de Razor que vc mencionou.
+
+- Ainda em _Layout.cshtml o método ActionLink tenta chamar uma Controller que também não existe "HomeController", apontando para o método inicial "Index".
+
+--=================================================================================================
+CONCLUSAO:
+--=================================================================================================
+
+Esse projeto NUNCA funcionará da maneira que está, e provavelmente nunca funcinou nem mesmo na sua maquina.
+
+Nem avaliei os demais objetos, Model, View, Controllers e .Cs's, uma vez que não o projeto não funciona.
+
+Vamos conversar mais por whats, sobre o seu nível de exp como desenvolvedora, mas está claro que ainda é bem júnior.
+
+Vc ainda não compreende o básico do básico. Através dessa solution, não foi capaz nem de trazer informações do banco para uma página html.
+
+Irei deixar a solution "rodával", e pontuar as alterções feitas, para começar a te ensinar um pouco sobre desenvolvimento Web.
+
+
+--=================================================================================================
+Alterações para funcionar:
+--=================================================================================================
+Antes uma breve explicação do que é MVC em minhas palavras:
+
+MVC é só mais um framework, que faz com que dados do banco aparecam em uma pagina Web. Não há nada mágico ou tecnológico nele, apenas moda.
+
+MVC são siglas para Model, View e Controller. Reza a lenda que o foco e a vantagem do MVC é a separação de responsabilidades, isto é cada letra/sigla
+faria uma coisa, mas isso depende do desenvolvedor programar da maneira correta, o que eu posso te afirmar depois de muitos anos de carreira é que isso NÃO ACONTECE, por diversos motivos, e um ótimo exemplo é você, que ao construir sua aplicação escreveu erroneamente lógicas de leitura na classe de controle, quando a mesma deveria apenas chamar a classe de Model que ai sim teria a lógica de leitura de dados do banco.
+
+
+Mas seguindo a teoria, a Model teria a lógica de programação, IF's, acesso ao banco, cálculos, etc, a View seria o html que o usuário vê, e a Controller faria o meio de campo, a comunicação da View com a Model, por isso então chamada de controle.
+
+Mais informações básicas em: http://www.macoratti.net/13/04/mvc4_app.htm
+
+Então seguimos para as alterações que eu fiz para a aplicação funcionar
+
+- Criei uma pasta chamada "Controllers" para padronizar o local onde ficam as controllers
+- Pra ficar bonitinho, na ordem da sigla, eu enumerei as pastas com 01, 02 e 03, para formar a ordem MVC
+- Também criei uma pasta dentro de Views, chamada "Contato", imaginando que no futuro a aplicação tenha vários módulos, criar pastas é a melhor maneira de organizar as pagínas html
+- ContatoModels.cs - Apaguei a primeira linha "using Crud1.Models.Contato;"
+- ContatoModels.cs - Alterei o namespace de "Contato.Models" para "Crud1.Models"
+- ContatoModels.cs- Alterei o nome do objeto da Classe de "ContatoModel" para "Contato", já que esse .cs possui a lógica de acesso à dados a regra diz que ele receba apenas o nome do módulo
+- ContatoModels.cs - Alterei o nome do arquivo para "Contato.cs"
+- Contato.cs - Alterei o nome do arquivo para "ContatoModel.cs"
+- Contato.cs - Alterei o namespace de "Contato.Models" para "Crud1.Models"
+- Contato.cs - Alterei o nome do objeto para ContatoModel.cs
+- Contato.cs - O arquivo tinha a ultima chave "}" comentada. Dessa maneira dava erro de compilação.
+- Contato.cs - O arquivo tinha uma chave fechando dentro da declaração de propriedades incorretamente. Foi removida.
+- ContatoModel.cs - Removido também a declaração inutil das bibliotecas: System, System.Collections.Generic, System.Linq e System.Web.
+- Contato.cs - Removido também a declaração inutil da biblioteca: System.
+- Contato.cs - Apagada a subclasse Contato, aquela que tinha a conexão com o banco de dados. Obs: Não é inteligente (apesar de mtos devs fazerem) deixar a conexão com o banco numa classe que ao ir para o servidor irá compilada em uma DLL. O ideal é deixar a string de conexão num arquivo que seja possível alterar, sem ter que re-publicar o site. Dessa maneira vc teria menos trabalho para dar manutenção num ambiente de produção. Porque seria só acessar o arquivo, um webconfig por exemplo, alterar e salvar. Já no .cs .. vc teria que abrir o VS, alterar, compilar e publicar o site todo novamente.
+p.S: Eu sei de onde vc tirou esse exemplo, nao é culpa sua, ta na internet este e outros milhares de exemplos iguais, inclusive de pessoas que se dizem professores e que vendem cursos, assim como esse tal de Henrique Dezani.
+
+- Contato.cs - Apagado os métodos Dispose, Create, Read, Update e Delete. Apaguei tudo na verdade kkk .. Ao invés de modificalos alterando os parametros de entrada e de saída, eu optei por
+remover de uma vez, para poupar trabalho. Dessa maneira eu aproveita para criar os métodos com os nomes padrões do desenvolvimento Web. Get, Post, etc.
+- Contato.cs - Criado métodos novos (vide código)
+- ContatoController.cs - removida referencia a biblioteca "using ContatoWeb.Models;"
+- ContatoController.cs - Alterada a referencia a biblioteca de "Crud1.Models.Contato" para "Crud1.Models".
+- ContatoController.cs - Alterado o parametro de entrada do método Index de vazio para "ContatoModel model".
+- ContatoController.cs - Criado novos metodos de Adição e Deleção
+- ContatoController.cs - Alterado o namespace para Crud1.Controllers
+- WebConfig - Alterado totalmente para solucionar o problema do Razor
+- Crud1 (Propriedades do projeto) - Alterado o targetFramework para solucionar problemas de Extensions do MVC
+- Adicionada uma pasta de App_start
+- Dentro da pasta App_Start arquivos .CS com a configuração de inicialização do projeto, Autenticação, Rotas etc
+- Alterado o Arquivo RouteConfig.cs para iniciar sempre pela Controller ContatoController, ação Index.
+- 
